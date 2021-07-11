@@ -1,0 +1,1304 @@
+<!DOCTYPE html>
+	<html class="sl-root decks export offline loaded">
+	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<title>Dynamic and Metaprogramming with Crystal</title>
+
+		<meta name="description" content="Compiled, statically typed languages aren&#39;t typically known for their dynamic nature or their ability to cater to metaprogramming of the type that languages like Ruby are known for. And while it is true that some of the things that Ruby does aren&#39;t easily supported within the Crystal ecosystem, Crystal does provide programmers with a powerful, capable set of tools for building the same sorts of dynamic metaprogramming that Ruby is known for. This talk will survey some of those techniques, and look at how they work to achieve surprisingly powerful results.">
+
+		<link rel="stylesheet" type="text/css" href="lib/offline-v2.css">
+
+
+
+	</head>
+	<body class="reveal-viewport theme-font-josefine theme-color-cobalt-orange">
+		<div class="reveal">
+			<div class="slides">
+				<section data-id="ababf845d1bb95d325c9e0e864b21e2b"><div class="sl-block" data-block-type="text" style="width: 1120px; left: 80px; top: 72px; height: auto;" data-block-id="feba58c33d9c2e496c5fcb0f95804100"><div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 10;">
+<h1>(Dynamic|Meta)Programming With Crystal</h1>
+
+<p> </p>
+
+<p>Kirk Haines</p>
+
+<p>Principal Developer Relations Engineer w/ New Relic</p>
+
+<p> </p>
+
+<p> </p>
+
+<p> </p>
+
+<p>@wyhaines everywhere</p>
+
+<p>https://www.therelicans.com/wyhaines</p>
+</div></div>
+
+</section><section class="stack" data-id="00440eb738335c0c8b4ba46de0949658"><section data-id="0a5d3d1213647276354c3edf1dba8126"><div class="sl-block" data-block-type="text" style="width: 1120px; left: 80px; top: 72px; height: auto;" data-block-id="cdc2290b8841b8ae47695f2e84161590">
+<div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 10;" dir="ui">
+<h1>Defining Terms<br>
+Dynamic </h1>
+
+<p> </p>
+
+<p> </p>
+
+<p> </p>
+
+<p>This term is heavily overloaded!</p>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension>
+</div>
+
+</section><section data-id="7c8e4bcbe3822479053bacc1c676675e"><div class="sl-block" data-block-type="text" style="width: 1120px; left: 80px; top: 72px; height: auto;" data-block-id="1642dcb88c33085d9f4a0f645e8d5657">
+<div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 10;" dir="ui">
+<h1>Defining Terms</h1>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension>
+</div>
+
+<div class="sl-block" data-block-type="text" data-name="text-d68680" data-block-id="2eb32ccd868022765ef483535969c9f4" style="height: auto; width: 1120px; left: 80px; top: 173px;"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;">
+<blockquote>
+<h2 style="color:rgb(255, 255, 255)">Dynamic</h2>
+</blockquote>
+
+<p style="color:rgb(255, 255, 255)"> </p>
+
+<p style="color:rgb(255, 255, 255)">https://en.wikipedia.org/wiki/Dynamic_programming</p>
+
+<p style="color:rgb(255, 255, 255)"> </p>
+
+<p style="color:rgb(255, 255, 255)">I do not mean this:</p>
+
+<p style="color:rgb(255, 255, 255)"> </p>
+
+<blockquote style="color:rgb(255, 255, 255)">
+<p>...it refers to simplifying a complicated problem by breaking it down into simpler sub-problems in a <a href="https://en.wikipedia.org/wiki/Recursion" target="_blank">recursive</a> manner.</p>
+</blockquote>
+</div></div>
+<div class="sl-block" data-block-type="line" data-name="line-d11035" data-block-id="773e25fd6a99f8fb4b67fa8bd3d1a705" style="width: auto; height: auto; min-width: 0px; min-height: 0px; left: 160px; top: 432px;"><div class="sl-block-style" style="z-index: 12; filter: blur(3px);"><div class="sl-block-content" data-line-x1="0" data-line-y1="144" data-line-x2="1040" data-line-y2="0" data-line-color="#ff0000" data-line-start-type="none" data-line-end-type="none" style="z-index: 12;" data-line-width="5px"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" preserveaspectratio="xMidYMid" width="1040" height="144" viewbox="0 0 1040 144"><line stroke="rgba(0,0,0,0)" stroke-width="15" x1="0.5" y1="144.5" x2="1040.5" y2="0.5"></line><line class="line-element" stroke="#ff0000" stroke-width="5" x1="0.5" y1="144.5" x2="1040.5" y2="0.5"></line></svg></div></div></div>
+<div class="sl-block" data-block-type="line" style="width: auto; height: auto; min-width: 0px; min-height: 0px; left: 160px; top: 432px;" data-block-id="b4c2b3ae3f871f1b24ef33e5f6be7f68" data-name="line-246b7c"><div class="sl-block-style" style="z-index: 13; filter: blur(3px);"><div class="sl-block-content" data-line-x1="0" data-line-y1="0" data-line-x2="1040" data-line-y2="144" data-line-color="#ff0000" data-line-start-type="none" data-line-end-type="none" style="z-index: 13;" data-line-width="5px"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" preserveaspectratio="xMidYMid" width="1040" height="144" viewbox="0 0 1040 144"><line stroke="rgba(0,0,0,0)" stroke-width="15" x1="0.5" y1="0.5" x2="1040.5" y2="144.5"></line><line class="line-element" stroke="#ff0000" stroke-width="5" x1="0.5" y1="0.5" x2="1040.5" y2="144.5"></line></svg></div></div></div></section><section data-id="7d4c730384e141bc71e586c81cb7dd66"><div class="sl-block" data-block-type="text" style="width: 1120px; left: 80px; top: 72px; height: auto;" data-block-id="c98dfe815c51da6ec91c8b9ce663b94f">
+<div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 10;" dir="ui">
+<h1>Defining Terms</h1>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension>
+</div>
+
+<div class="sl-block" data-block-type="text" data-name="text-d68680" style="height: auto; width: 1120px; left: 80px; top: 173px;" data-block-id="a92787a085edd2ef5ea3331494c62270">
+<div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;">
+<blockquote>
+<h2 style="color:rgb(255, 255, 255)">Dynamic</h2>
+</blockquote>
+
+<p style="color:rgb(255, 255, 255)"> </p>
+
+<p style="color:rgb(255, 255, 255)">https://en.wikipedia.org/wiki/Dynamic_programming_language</p>
+
+<p style="color:rgb(255, 255, 255)">We kind of mean this:</p>
+
+<p style="color:rgb(255, 255, 255)"> </p>
+
+<blockquote>
+<p>...a class of <a href="https://en.wikipedia.org/wiki/High-level_programming_language" target="_blank">high-level programming languages</a>, which at <a href="https://en.wikipedia.org/wiki/Runtime_(program_lifecycle_phase)" target="_blank">runtime</a> execute many common programming behaviours that static programming languages perform during <a href="https://en.wikipedia.org/wiki/Compiler" target="_blank">compilation</a>...object...alteration...reflection...macros...</p>
+</blockquote>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension>
+</div>
+<div class="sl-block" data-block-type="line" data-name="line-d11035" style="width: auto; height: auto; left: 160px; top: 432px;" data-block-id="96d8a0df419210d7cefed7c8ba10ef71"><div class="sl-block-style" style="z-index: 12; filter: blur(30px);"><div class="sl-block-content" data-line-x1="0" data-line-y1="144" data-line-x2="1040" data-line-y2="0" data-line-color="#ffff00" data-line-start-type="none" data-line-end-type="none" style="z-index: 12;" data-line-width="40px"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" preserveaspectratio="xMidYMid" width="1040" height="144" viewbox="0 0 1040 144"><line class="line-element" stroke="#ffff00" stroke-width="40" x1="0" y1="144" x2="1040" y2="0"></line></svg></div></div></div>
+<div class="sl-block" data-block-type="line" style="width: auto; height: auto; left: 160px; top: 432px;" data-name="line-246b7c" data-block-id="75878977b6378bc63f102e31bef574ff"><div class="sl-block-style" style="z-index: 13; filter: blur(30px);"><div class="sl-block-content" data-line-x1="0" data-line-y1="0" data-line-x2="1040" data-line-y2="144" data-line-color="#ffff00" data-line-start-type="none" data-line-end-type="none" style="z-index: 13;" data-line-width="40px"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" preserveaspectratio="xMidYMid" width="1040" height="144" viewbox="0 0 1040 144"><line class="line-element" stroke="#ffff00" stroke-width="40" x1="0" y1="0" x2="1040" y2="144"></line></svg></div></div></div></section><section data-id="ec1f5f036d8cce7f7791f3edbd6987df"><div class="sl-block" data-block-type="text" style="width: 1120px; left: 80px; top: 72px; height: auto;" data-block-id="943607903f0d1b31817a70405df85020">
+<div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 10;" dir="ui">
+<h1>Defining Terms</h1>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension>
+</div>
+
+<div class="sl-block" data-block-type="text" data-name="text-d68680" style="height: auto; width: 1120px; left: 80px; top: 173px;" data-block-id="ed54a8c716d85785c687edfc5781ad80">
+<div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;">
+<blockquote>
+<h2 style="color:rgb(255, 255, 255)">Dynamic</h2>
+</blockquote>
+
+<p style="color:rgb(255, 255, 255)"> </p>
+
+<p style="color:rgb(255, 255, 255)"> </p>
+
+<p style="color:rgb(255, 255, 255)"> </p>
+
+<p style="color:rgb(255, 255, 255)">Crystal is a compiled, statically typed language, and it is not a dynamic language.</p>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension>
+</div></section><section data-id="131d7b0d83279d81df1ca516986fec83"><div class="sl-block" data-block-type="text" style="width: 1120px; left: 80px; top: 72px; height: auto;" data-block-id="88187c5578485b2622cf4ce4132ca315">
+<div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 10;" dir="ui">
+<h1>Defining Terms</h1>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension>
+</div>
+
+<div class="sl-block" data-block-type="text" data-name="text-d68680" style="height: auto; width: 1120px; left: 80px; top: 173px;" data-block-id="3cbc7ec90f754bd8895b86d89fc0d82f">
+<div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;">
+<blockquote>
+<h2 style="color:rgb(255, 255, 255)">Dynamic</h2>
+</blockquote>
+
+<p style="color:rgb(255, 255, 255)"> </p>
+
+<p style="color:rgb(255, 255, 255)"> </p>
+
+<p style="color:rgb(255, 255, 255)"> </p>
+
+<p style="color:rgb(255, 255, 255)">All Done! Time for the next talk!</p>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension>
+</div></section></section><section class="stack" data-id="fddb93bbe631d1e4c3f391a12439d710"><section data-id="a5383e8404a0e2024c71f422d797d52b"><div class="sl-block" data-block-type="text" style="width: 1120px; left: 80px; top: 72px; height: auto;" data-block-id="7a6c1a978ccb1c5d11c2ac17ae49e63d">
+<div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 10;" dir="ui">
+<h1>Defining Terms</h1>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension>
+</div>
+
+<div class="sl-block" data-block-type="text" data-name="text-d68680" style="height: auto; width: 1120px; left: 80px; top: 173px;" data-block-id="9e71c4e81dcf60e3a9d4637b38878c4d">
+<div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;">
+<blockquote><span style="font-size:57px">Metaprogramming</span></blockquote>
+
+<p style="color:rgb(255, 255, 255)"> </p>
+
+<p style="color:rgb(255, 255, 255)">https://en.wikipedia.org/wiki/Metaprogramming</p>
+
+<p style="color:rgb(255, 255, 255)"> </p>
+
+<p style="color:rgb(255, 255, 255)">Metaprogramming is a technique where code is treated as data. Also:</p>
+
+<p style="color:rgb(255, 255, 255)"> </p>
+
+<blockquote>
+<p>Metaprogramming can be used to move computations from <a href="https://en.wikipedia.org/wiki/Run_time_(program_lifecycle_phase)" target="_blank">run-time</a> to <a href="https://en.wikipedia.org/wiki/Compile-time" target="_blank">compile-time</a>, to generate code using compile time computations, and to enable <a href="https://en.wikipedia.org/wiki/Self-modifying_code" target="_blank">self-modifying code</a>.  </p>
+</blockquote>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension>
+</div></section><section data-id="cbafc499542db30cab906c4299dd920e"><div class="sl-block" data-block-type="text" style="width: 1120px; left: 80px; top: 72px; height: auto;" data-block-id="b236b2cfce5652e876e2a8ea18fcee5a">
+<div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 10;" dir="ui">
+<h1>Defining Terms</h1>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension>
+</div>
+
+<div class="sl-block" data-block-type="text" data-name="text-d68680" style="height: auto; width: 1120px; left: 80px; top: 173px;" data-block-id="6b6bbf4f81c59e3529617a9d191f5ae6">
+<div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;">
+<blockquote><span style="font-size:57px">Metaprogramming</span></blockquote>
+
+<p style="color:rgb(255, 255, 255)"> </p>
+
+<p style="color:rgb(255, 255, 255)"> </p>
+
+<p style="color:rgb(255, 255, 255)"> </p>
+
+<p style="color:rgb(255, 255, 255)">Metaprogramming tools overlap Dynamic Language tools,</p>
+
+<p style="color:rgb(255, 255, 255)">and they enable those tools in Crystal.</p>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension>
+</div></section><section data-id="26c51459a7b56405a0eb24db7d8de9ac"><div class="sl-block" data-block-type="text" style="width: 1120px; left: 80px; top: 72px; height: auto;" data-block-id="30c6a80e045ca455167b06ad198d463d">
+<div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 10;" dir="ui">
+<h1>Defining Terms</h1>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension>
+</div>
+
+<div class="sl-block" data-block-type="text" data-name="text-d68680" style="height: auto; width: 1120px; left: 80px; top: 173px;" data-block-id="a3d18a1c26e8f52d80b93766bf245947">
+<div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;">
+<blockquote><span style="font-size:57px">Metaprogramming</span></blockquote>
+
+<p style="color:rgb(255, 255, 255)"> </p>
+
+<p style="color:rgb(255, 255, 255)"> </p>
+
+<p style="color:rgb(255, 255, 255)"> </p>
+
+<p style="color:rgb(255, 255, 255)">Languages like Javascript and Ruby support <em>eval()</em></p>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension>
+</div></section><section data-id="22f51440cde528466d3a55a090a93f9c"><div class="sl-block" data-block-type="text" style="width: 1120px; left: 80px; top: 72px; height: auto;" data-block-id="4c4081c74e0d102fac9a279ce7e049ee">
+<div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 10;" dir="ui">
+<h1>Defining Terms</h1>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension>
+</div>
+
+<div class="sl-block" data-block-type="text" data-name="text-d68680" style="height: auto; width: 1120px; left: 80px; top: 173px;" data-block-id="8c891de68eb58c55c592b7ab76cb862f">
+<div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;" dir="ui">
+<blockquote><span style="font-size:57px">Metaprogramming</span></blockquote>
+
+<p style="color:rgb(255, 255, 255)"> </p>
+
+<p style="color:rgb(255, 255, 255)"> </p>
+
+<p style="color:rgb(255, 255, 255)"> </p>
+
+<p style="color:rgb(255, 255, 255)">Crystal doesn't support eval()*​</p>
+
+<p style="color:rgb(255, 255, 255)"> </p>
+
+<p style="color:rgb(255, 255, 255)"><span style="font-size:0.7em">(interpreted Crystal, unveiled by Asterite earlier, might, on some levels, change this)</span></p>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension>
+</div></section><section data-id="49b2a8df07d1d5debee5f3f4da9a9001"><div class="sl-block" data-block-type="text" style="width: 1120px; left: 80px; top: 72px; height: auto;" data-block-id="763858709ce6c39544cca2d298b67c22">
+<div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 10;" dir="ui">
+<h1>Defining Terms</h1>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension>
+</div>
+
+<div class="sl-block" data-block-type="text" data-name="text-d68680" style="height: auto; width: 1120px; left: 80px; top: 173px;" data-block-id="02372122d2dfd8ee29db26879363de6e">
+<div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;" dir="ui">
+<blockquote><span style="font-size:57px">Metaprogramming</span></blockquote>
+
+<p style="color:rgb(255, 255, 255)"> </p>
+
+<p style="color:rgb(255, 255, 255)"> </p>
+
+<p style="color:rgb(255, 255, 255)">Crystal does have:</p>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension>
+</div></section><section data-id="255e53c5057cd1fe632568f917da3f68"><div class="sl-block" data-block-type="text" style="width: 1120px; left: 80px; top: 72px; height: auto;" data-block-id="6847b9fa1202eec1af9f0b0ca1c0dec0">
+<div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 10;" dir="ui">
+<h1>Defining Terms</h1>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension>
+</div>
+
+<div class="sl-block" data-block-type="text" data-name="text-d68680" style="height: auto; width: 1120px; left: 80px; top: 173px;" data-block-id="10194c65d4c8da2ea04b96c15f2c44e7">
+<div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;" dir="ui">
+<blockquote><span style="font-size:57px">Metaprogramming</span></blockquote>
+
+<p style="color:rgb(255, 255, 255)"> </p>
+
+<p style="color:rgb(255, 255, 255)"> </p>
+
+<p style="color:rgb(255, 255, 255)">Crystal does have:</p>
+
+<ol>
+	<li style="color: rgb(255, 255, 255);">Mixins and reopenable classes</li>
+</ol>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension>
+</div></section><section data-id="ddc1d2cd409044ee761d26e2e49d4ebf"><div class="sl-block" data-block-type="text" style="width: 1120px; left: 80px; top: 72px; height: auto;" data-block-id="5fbe5e177b8876661e10943f65fe7fa4">
+<div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 10;" dir="ui">
+<h1>Defining Terms</h1>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension>
+</div>
+
+<div class="sl-block" data-block-type="text" data-name="text-d68680" style="height: auto; width: 1120px; left: 80px; top: 173px;" data-block-id="5c9753014826c40bd0d4b2eb9799920b">
+<div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;" dir="ui">
+<blockquote><span style="font-size:57px">Metaprogramming</span></blockquote>
+
+<p style="color:rgb(255, 255, 255)"> </p>
+
+<p style="color:rgb(255, 255, 255)"> </p>
+
+<p style="color:rgb(255, 255, 255)">Crystal does have:</p>
+
+<ol>
+	<li style="color:rgb(255, 255, 255)">Mixins and reopenable classes</li>
+	<li style="color:rgb(255, 255, 255)">Reflection</li>
+</ol>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension>
+</div></section><section data-id="1871517557bcdcfe8e08e2e5f954b0dc"><div class="sl-block" data-block-type="text" style="width: 1120px; left: 80px; top: 72px; height: auto;" data-block-id="cbd7a3cf06368bbc77007d3a122d45d8">
+<div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 10;" dir="ui">
+<h1>Defining Terms</h1>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension>
+</div>
+
+<div class="sl-block" data-block-type="text" data-name="text-d68680" style="height: auto; width: 1120px; left: 80px; top: 173px;" data-block-id="c3398e0a90d21658d8f17b9574e245f5">
+<div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;" dir="ui">
+<blockquote><span style="font-size:57px">Metaprogramming</span></blockquote>
+
+<p style="color:rgb(255, 255, 255)"> </p>
+
+<p style="color:rgb(255, 255, 255)"> </p>
+
+<p style="color:rgb(255, 255, 255)">Crystal does have:</p>
+
+<ol>
+	<li style="color:rgb(255, 255, 255)">Mixins and reopenable classes</li>
+	<li style="color:rgb(255, 255, 255)">Reflection</li>
+	<li style="color:rgb(255, 255, 255)">Macros</li>
+</ol>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension>
+</div></section></section><section class="stack" data-id="2b4530d89b43a9888b9f792a29342c06"><section data-id="ad9f6f0306afdeadb6c03df0978a2bed"><div class="sl-block" data-block-type="text" style="width: 1120px; left: 80px; top: 72px; height: auto;" data-block-id="249df4e1ce6e0e480c27d129230efbc4">
+<div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 10;" dir="ui">
+<h1>Compare &amp; Contrast</h1>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension>
+</div>
+
+<div class="sl-block" data-block-type="text" data-name="text-d68680" style="height: auto; width: 1120px; left: 80px; top: 173px;" data-block-id="7b098459923fd2ab8a94354338d27ab1">
+<div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11; font-size: 96%;">
+<h2>Ruby &lt;=&gt; Crystal</h2>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension>
+</div></section><section data-id="a1de8090638b92a5a0caa92313b2d6c5"><div class="sl-block" data-block-type="text" style="width: 1120px; left: 80px; top: 72px; height: auto;" data-block-id="480731c188f42b647f61b4880a275a67">
+<div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 10;" dir="ui">
+<h1>Compare &amp; Contrast</h1>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension>
+</div>
+
+<div class="sl-block" data-block-type="text" data-name="text-d68680" style="height: auto; width: 1120px; left: 80px; top: 174px;" data-block-id="950cfde12131097242554343d8528503">
+<div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;">
+<h2>Ruby is dynamically typed*</h2>
+
+<p> </p>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension>
+</div></section><section data-id="f73dad14367b248c4a582bebf40b55a8"><div class="sl-block" data-block-type="text" style="width: 1120px; left: 80px; top: 72px; height: auto;" data-block-id="cb755da7d10503a35390890b6a5885e3">
+<div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 10;" dir="ui">
+<h1>Compare &amp; Contrast</h1>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension>
+</div>
+
+<div class="sl-block" data-block-type="text" data-name="text-d68680" style="height: auto; width: 1120px; left: 80px; top: 173px;" data-block-id="7ef576c34849973989de310ab337dc1f">
+<div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11; font-size: 98%;" dir="ui">
+<h2>Ruby is dynamically typed*</h2>
+
+<h2>Ruby has eval - <span style="font-size:0.7em"><em>method_eval</em>(), <em>class_eval</em>(), and <em>eval</em>()</span>
+</h2>
+
+<h2> </h2>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension>
+</div></section><section data-id="14864b5db310d0cb8828fc57c6085d2c"><div class="sl-block" data-block-type="text" style="width: 1120px; left: 80px; top: 72px; height: auto;" data-block-id="772dbdd7b86ba380abb80bf0648b0139">
+<div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 10;" dir="ui">
+<h1>Compare &amp; Contrast</h1>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension>
+</div>
+
+<div class="sl-block" data-block-type="text" data-name="text-d68680" style="height: auto; width: 1120px; left: 80px; top: 173px;" data-block-id="79d364386b6f5df2b7d6cad6888c1da3">
+<div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11; font-size: 95%;" dir="ui">
+<h2>Ruby is dynamically typed*</h2>
+
+<h2>Ruby has eval - <span style="font-size:0.7em"><em>method_eval</em>(), <em>class_eval</em>(), and <em>eval</em>()</span>
+</h2>
+
+<h2>Ruby has <em>define_method</em> / <em>remove_method</em>
+</h2>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension>
+</div></section><section data-id="952d1e6e1cdadd20091f8085a01ce514"><div class="sl-block" data-block-type="text" style="width: 1120px; left: 80px; top: 72px; height: auto;" data-block-id="3c8f60d136ce448fc3d9a290d0c83c40">
+<div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 10;" dir="ui">
+<h1>Compare &amp; Contrast</h1>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension>
+</div>
+
+<div class="sl-block" data-block-type="text" data-name="text-d68680" style="height: auto; width: 1120px; left: 80px; top: 173px;" data-block-id="e50593b9ad3d764772e4e15781e475a3">
+<div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11; font-size: 92%;" dir="ui">
+<h2>Ruby is dynamically typed*</h2>
+
+<h2>Ruby has eval - <span style="font-size:0.7em"><em>method_eval</em>(), <em>class_eval</em>(), and <em>eval</em>()</span>
+</h2>
+
+<h2>Ruby has <em>define_method</em> / <em>remove_method</em>
+</h2>
+
+<h2>Ruby has <em>include</em> / <em>extend</em>
+</h2>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension>
+</div></section><section data-id="1ee2186a182a447096c8b56e05de3958"><div class="sl-block" data-block-type="text" style="width: 1120px; left: 80px; top: 72px; height: auto;" data-block-id="be119a39a8d5412f27a469cb656aed99">
+<div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 10;" dir="ui">
+<h1>Compare &amp; Contrast</h1>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension>
+</div>
+
+<div class="sl-block" data-block-type="text" data-name="text-d68680" style="height: auto; width: 1120px; left: 80px; top: 173px;" data-block-id="41d9a748d31199add3262f1965f99ad9">
+<div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11; font-size: 89%;" dir="ui">
+<h2>Ruby is dynamically typed*</h2>
+
+<h2>Ruby has eval - <span style="font-size:0.7em"><em>method_eval</em>(), <em>class_eval</em>(), and <em>eval</em>()</span>
+</h2>
+
+<h2>Ruby has <em>define_method</em> / <em>remove_method</em>
+</h2>
+
+<h2>Ruby has <em>include</em> / <em>extend</em>
+</h2>
+
+<h2>Ruby has refinements</h2>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension>
+</div></section><section data-id="4d2c3c5e227a6b77fcfe861e8d593720"><div class="sl-block" data-block-type="text" style="width: 1120px; left: 80px; top: 72px; height: auto;" data-block-id="c3c14c36e4b991c70897140c8d41fc3c">
+<div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 10;" dir="ui">
+<h1>Compare &amp; Contrast</h1>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension>
+</div>
+
+<div class="sl-block" data-block-type="text" data-name="text-d68680" style="height: auto; width: 1120px; left: 80px; top: 173px;" data-block-id="7b256337f04554ea252c3d4e3f599c22">
+<div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11; font-size: 86%;" dir="ui">
+<h2>Ruby is dynamically typed*</h2>
+
+<h2>Ruby has eval - <span style="font-size:0.7em"><em>method_eval</em>(), <em>class_eval</em>(), and <em>eval</em>()</span>
+</h2>
+
+<h2>Ruby has <em>define_method</em> / <em>remove_method</em>
+</h2>
+
+<h2>Ruby has <em>include</em> / <em>extend</em>
+</h2>
+
+<h2>Ruby has refinements</h2>
+
+<h2>Ruby has <em>send</em>
+</h2>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension>
+</div></section><section data-id="58c63e0988d913deda6de9735d491401"><div class="sl-block" data-block-type="text" style="width: 1120px; left: 80px; top: 72px; height: auto;" data-block-id="d1020386c179c062a6947119b2d7b9c1">
+<div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 10;" dir="ui">
+<h1>Compare &amp; Contrast</h1>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension>
+</div>
+
+<div class="sl-block" data-block-type="text" data-name="text-d68680" style="height: auto; width: 1120px; left: 80px; top: 173px;" data-block-id="75617a7cf5ae70926efb25662e497781">
+<div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11; font-size: 83%;" dir="ui">
+<h2>Ruby is dynamically typed*</h2>
+
+<h2>Ruby has eval - <span style="font-size:0.7em"><em>method_eval</em>(), <em>class_eval</em>(), and <em>eval</em>()</span>
+</h2>
+
+<h2>Ruby has <em>define_method</em> / <em>remove_method</em>
+</h2>
+
+<h2>Ruby has <em>include</em> / <em>extend</em>
+</h2>
+
+<h2>Ruby has refinements</h2>
+
+<h2>Ruby has <em>send</em>
+</h2>
+
+<h2>Ruby has <em>method_missing</em>
+</h2>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension>
+</div></section><section data-id="a0524f297d2a4870f91081e090337b94"><div class="sl-block" data-block-type="text" style="width: 1120px; left: 80px; top: 72px; height: auto;" data-block-id="8cfc28daa9e7c649b7680a72343885e4">
+<div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 10;" dir="ui">
+<h1>Compare &amp; Contrast</h1>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension>
+</div>
+
+<div class="sl-block" data-block-type="text" data-name="text-d68680" style="height: auto; width: 1120px; left: 80px; top: 173px;" data-block-id="0f6205bc00e00313cf3e5a321903d5da">
+<div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11; font-size: 96%;" dir="ui">
+<h2>Crystal is statically typed</h2>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension>
+</div></section><section data-id="6059aeafa08eb3a6dc25d50cad29ad8d"><div class="sl-block" data-block-type="text" style="width: 1120px; left: 80px; top: 72px; height: auto;" data-block-id="55ae326a01c357eb5c51c5c2b366c833">
+<div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 10;" dir="ui">
+<h1>Compare &amp; Contrast</h1>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension>
+</div>
+
+<div class="sl-block" data-block-type="text" data-name="text-d68680" style="height: auto; width: 1120px; left: 80px; top: 173px;" data-block-id="c946ae27a0ad95f8e525c0af010b7d47">
+<div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11; font-size: 96%;" dir="ui">
+<h2>Crystal is statically typed*</h2>
+
+<h2>Crystal has <em>include</em> / <em>extend</em>
+</h2>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension>
+</div></section><section data-id="0908e915ed52e554210544d3ac3a8f72"><div class="sl-block" data-block-type="text" style="width: 1120px; left: 80px; top: 72px; height: auto;" data-block-id="189df32a39d797a9cdbfc5947deb2e86">
+<div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 10;" dir="ui">
+<h1>Compare &amp; Contrast</h1>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension>
+</div>
+
+<div class="sl-block" data-block-type="text" data-name="text-d68680" style="height: auto; width: 1120px; left: 80px; top: 173px;" data-block-id="a9c53323b18b663db7a0ed3962bbca73">
+<div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11; font-size: 96%;" dir="ui">
+<h2>Crystal is statically typed*</h2>
+
+<h2>Crystal has <em>include</em> / <em>extend</em>
+</h2>
+
+<h2>Crystal has <em>method_missing</em>*</h2>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension>
+</div></section><section data-id="7b698ae22d3be6d55e56c574a5be7d05"><div class="sl-block" data-block-type="text" style="width: 1120px; left: 80px; top: 72px; height: auto;" data-block-id="529a83d64cc4fe84e126d7e9848c3abe">
+<div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 10;" dir="ui">
+<h1>Compare &amp; Contrast</h1>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension>
+</div>
+
+<div class="sl-block" data-block-type="text" data-name="text-d68680" style="height: auto; width: 1120px; left: 80px; top: 173px;" data-block-id="c4c21a878877e67edd9fb1b8d77242fb">
+<div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11; font-size: 96%;" dir="ui">
+<h2>Crystal is statically typed*</h2>
+
+<h2>Crystal has <em>include</em> / <em>extend</em>
+</h2>
+
+<h2>Crystal has <em>method_missing</em>*</h2>
+
+<h2>Crystal has macros!!!</h2>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension>
+</div></section><section data-id="9e0f7bf8550dd4638cdb8eedb5aabd38"><div class="sl-block" data-block-type="text" style="width: 1120px; left: 80px; top: 72px; height: auto;" data-block-id="20055124fa9072276d03a5fb4544d571">
+<div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 10;" dir="ui">
+<h1>Compare &amp; Contrast</h1>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension>
+</div>
+
+<div class="sl-block" data-block-type="text" data-name="text-d68680" style="height: auto; width: 1120px; left: 80px; top: 173px;" data-block-id="542dffbc596cfe488db10c76acb5f129">
+<div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11; font-size: 96%;" dir="ui">
+<h2>Crystal is statically typed*</h2>
+
+<h2>Crystal has <em>include</em> / <em>extend</em>
+</h2>
+
+<h2>Crystal has <em>method_missing</em>*</h2>
+
+<h2>Crystal has macros!!!</h2>
+
+<h2><span style="font-size:0.7em">(and this means that Crystal can have dynamic things like <em>send...</em>)</span></h2>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension>
+</div></section></section><section data-id="7cb55437a7a1c001aeb9a92f87a8a5ff"><div class="sl-block" data-block-type="text" style="width: 1120px; left: 80px; top: 72px; height: auto;" data-block-id="876e9cdb662238ac238418499beb0fcd">
+<div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 10;" dir="ui">
+<h1>Now, Back to that Dynamic Thing...</h1>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension>
+</div>
+
+<div class="sl-block" data-block-type="text" data-name="text-d68680" style="height: auto; width: 1120px; left: 80px; top: 173px;" data-block-id="b7ef73a3c60cb348586594992908a720">
+<div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11; font-size: 96%;" dir="ui">
+<p><br></p>
+<p>https://chrisseaton.com/phd/specialising-ruby.pdf<br></p>
+<p><br></p>
+<p><br></p>
+<p><br></p>
+<blockquote><p>Metaprogramming can also be described as a dynamic language feature. <br></p></blockquote>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension>
+</div></section><section data-id="8a66e0a6e09da636a00b542feed333dc"><div class="sl-block" data-block-type="text" style="width: 1120px; left: 80px; top: 72px; height: auto;" data-block-id="c68a6f46da2919c40bba294e6ab63c5e">
+<div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 10;" dir="ui">
+<h1>Now, Back to that Dynamic Thing...</h1>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension>
+</div>
+
+<div class="sl-block" data-block-type="text" data-name="text-d68680" style="height: auto; width: 1120px; left: 80px; top: 173px;" data-block-id="91e81aa2f0433ea7aab700ffeb0b4070">
+<div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11; font-size: 96%;" dir="ui">
+<p> </p>
+
+<p> </p>
+
+<p> </p>
+
+<p> </p>
+
+<h2>Crystal has powerful metaprogramming features!</h2>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension>
+</div></section><section class="stack" data-id="7e3cf37ac1dd94a2973a4a06eb22f65d"><section data-id="4306436de0fa211e13f907796b8cfa20"><div class="sl-block" data-block-type="text" style="width: 1120px; left: 80px; top: 72px; height: auto;" data-block-id="b2d3e53db062ff66764f90dabcb87539">
+<div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 10;" dir="ui">
+<h1>Now, Back to that Dynamic Thing...</h1>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension>
+</div>
+
+<div class="sl-block" data-block-type="image" data-name="image-cccc33" data-block-id="b80f0ecece9b45b7812b6f8bd54b2975" style="width: 434.297px; height: 410.4px; left: 422.851px; top: 216px; min-width: 1px; min-height: 1px;"><div class="sl-block-content" style="z-index: 12;"><img style="" data-natural-width="418" data-natural-height="395" data-lazy-loaded="" data-src="dynamic_and_metaprogramming_with_crystal/50a2e38d1f995db29b7c2f5a95e96885.png"></div></div></section><section data-id="41f98b4f5ef21d26f4bae89d87df6392"><div class="sl-block" data-block-type="text" style="width: 1120px; left: 80px; top: 72px; height: auto;" data-block-id="6168f1af5a649da845367fc6e0ce9deb">
+<div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 10;" dir="ui">
+<h1>Now, Back to that Dynamic Thing...</h1>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension>
+</div>
+
+<div class="sl-block" data-block-type="image" data-name="image-cccc33" style="width: 228.577px; height: 216px; left: 80px; top: 180px; min-width: 1px; min-height: 1px;" data-block-id="407ee013960e61ef8ac75373c26832b6"><div class="sl-block-content" style="z-index: 11;"><img style="" data-natural-width="418" data-natural-height="395" data-lazy-loaded="" data-src="dynamic_and_metaprogramming_with_crystal/50a2e38d1f995db29b7c2f5a95e96885.png"></div></div>
+<div class="sl-block" data-block-type="image" data-name="image-1cc249" data-block-id="2533f3cb8efb4c7533c40527e269d439" style="width: 1075.2px; height: 230.095px; left: 124.8px; top: 417.905px; min-width: 1px; min-height: 1px;"><div class="sl-block-content" style="z-index: 12;"><img style="" data-natural-width="1257" data-natural-height="269" data-lazy-loaded="" data-src="dynamic_and_metaprogramming_with_crystal/0d378aff6c4098130a461edef9c733e0.png"></div></div>
+<div class="sl-block" data-block-type="text" data-name="text-e33b6f" data-block-id="9c45f9495ea7353697dd4c9e17cea53a" style="height: auto; width: 880px; left: 320px; top: 216px;"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 13;">
+<p style="text-align:right">What if you want more information?</p>
+
+<p style="text-align:right">Is it really only 40µs to handle a request?<br>
+What is the performance breakdown of different phases?<br>
+Can I get this without rewriting my app or Kemal?</p>
+</div></div></section><section data-id="43a5d90ed8a7ebe88f822f87545d685d"><div class="sl-block" data-block-type="text" style="width: 1120px; left: 80px; top: 72px; height: auto;" data-block-id="c2cd032b107fd12f17f04c8a24974e9b">
+<div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 10;" dir="ui">
+<h1>Now, Back to that Dynamic Thing...</h1>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension>
+</div>
+
+<div class="sl-block" data-block-type="image" data-name="image-2b358d" data-block-id="e61acb28422e0c8bd6b232c05ece7b24" style="width: 422.56px; height: 437.3px; left: 428.72px; top: 216px; min-width: 1px; min-height: 1px;"><div class="sl-block-content" style="z-index: 11;"><img style="" data-natural-width="430" data-natural-height="445" data-lazy-loaded="" data-src="dynamic_and_metaprogramming_with_crystal/56e288d6feec38cffe57e29ab4fb037d.png"></div></div></section><section data-id="827a7a349802f812425256ddec38d379"><div class="sl-block" data-block-type="text" style="width: 1120px; left: 80px; top: 72px; height: auto;" data-block-id="1ba5cb9a3c674401d4efa7142cab7efb">
+<div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 11;" dir="ui">
+<h1>Now, Back to that Dynamic Thing...</h1>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension>
+</div>
+
+<div class="sl-block" data-block-type="image" data-name="image-2b358d" style="width: 208.719px; height: 216px; left: 80px; top: 216px; min-width: 1px; min-height: 1px;" data-block-id="8a3ba1182083f190a2d06b9da3b3082d"><div class="sl-block-content" style="z-index: 12;"><img style="" data-natural-width="430" data-natural-height="445" data-lazy-loaded="" data-src="dynamic_and_metaprogramming_with_crystal/56e288d6feec38cffe57e29ab4fb037d.png"></div></div>
+<div class="sl-block" data-block-type="image" data-name="image-0a50d7" data-block-id="9ba25ec7ad1b3629d9fc92cb3f35d49e" style="width: 1075.2px; height: 213.716px; left: 124.8px; top: 432px; min-width: 1px; min-height: 1px;"><div class="sl-block-content" style="z-index: 10;"><img style="" data-natural-width="2274" data-natural-height="452" data-lazy-loaded="" data-src="dynamic_and_metaprogramming_with_crystal/21e480702c05bff1253ff80326eb7117.png"></div></div>
+<div class="sl-block" data-block-type="text" data-name="text-8a0a59" data-block-id="b51819b9485d1a8836fe4a40aaad46aa" style="height: auto; width: 880px; left: 320px; top: 216px;"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 13;">
+<p style="text-align: right;">Interesting....<br>
+<br>
+How does that work, anyway?</p>
+</div></div></section><section data-id="9319f462013bdbf658ed7a6d19c912a1"><div class="sl-block" data-block-type="text" style="width: 1120px; left: 80px; top: 72px; height: auto;" data-block-id="496f79efa244924c96b422dd14f62676">
+<div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 10;" dir="ui">
+<h1>Now, Back to that Dynamic Thing...</h1>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension>
+</div>
+
+<div class="sl-block" data-block-type="text" data-name="text-8a0a59" style="height: auto; width: 1120px; left: 80px; top: 216px;" data-block-id="ecab118456dba557175071ee293109f3"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;">
+<p>Classes in Crystal can be reopened</p>
+</div></div>
+<div class="sl-block" data-block-type="image" data-name="image-300015" data-block-id="92f8f70b07d1951c2e90d162f73ce6fd" style="width: 804.298px; height: 385.332px; left: 237.851px; top: 273.787px; min-width: 1px; min-height: 1px;"><div class="sl-block-content" style="z-index: 12;"><img style="" data-natural-width="2200" data-natural-height="1054" data-lazy-loaded="" data-src="dynamic_and_metaprogramming_with_crystal/c3a75997edf0cd7acd742c56e49da6ac.png"></div></div></section><section data-id="4334edd2138fd1c57769c2e2f3022a09"><div class="sl-block" data-block-type="text" style="width: 1120px; left: 80px; top: 72px; height: auto;" data-block-id="51dcdd500032d91b08de62ed8fba3c1f">
+<div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 10;" dir="ui">
+<h1>Now, Back to that Dynamic Thing...</h1>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension>
+</div>
+
+<div class="sl-block" data-block-type="text" data-name="text-8a0a59" style="height: auto; width: 1120px; left: 80px; top: 216px;" data-block-id="9c32546dd634add3d11e3ed1e404c206"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;">
+<p>#<em>previous_def</em> is the magic</p>
+</div></div>
+<div class="sl-block" data-block-type="image" data-name="image-300015" style="width: 804.298px; height: 385.332px; left: 237.851px; top: 273.787px; min-width: 1px; min-height: 1px;" data-block-id="ce1f30ff3c76dbd7bac8ba5e36fdb4aa"><div class="sl-block-content" style="z-index: 12;"><img style="" data-natural-width="2200" data-natural-height="1054" data-lazy-loaded="" data-src="dynamic_and_metaprogramming_with_crystal/c3a75997edf0cd7acd742c56e49da6ac.png"></div></div></section><section data-id="3a521996994cfc2b8cad91d3829f0f02"><div class="sl-block" data-block-type="text" style="width: 1120px; left: 80px; top: 72px; height: auto;" data-block-id="8c093f4bbe9fa4de48de8312e1cfc6cb">
+<div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 10;" dir="ui">
+<h1>Now, Back to that Dynamic Thing...</h1>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension>
+</div>
+
+<div class="sl-block" data-block-type="text" data-name="text-8a0a59" style="height: auto; width: 1120px; left: 80px; top: 216px;" data-block-id="00950aa7013a2e724ff7f3adf049f262">
+<div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;" dir="ui">
+<p> </p>
+
+<p> </p>
+
+<p>#<em>previous_def</em> calls the previous definition of the method</p>
+
+<p> </p>
+
+<p>This permits writing code which injects itself into other classes/structs, wrapping and overriding or proxying those methods.</p>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension>
+</div></section></section><section class="stack" data-id="d492a584d46261b85336d0f463982309"><section data-id="3685b05c55f6ac6bf7702b7e75389fd2"><div class="sl-block" data-block-type="text" style="width: 1120px; left: 80px; top: 72px; height: auto;" data-block-id="3477b366dd10bc957112e6e4aab9d279">
+<div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 10;" dir="ui">
+<h1>#<em>send</em> and Dynamic Dispatch</h1>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension>
+</div>
+
+<div class="sl-block" data-block-type="text" data-name="text-d68680" style="height: auto; width: 1120px; left: 80px; top: 173px;" data-block-id="8604b4b1d533e44006332c494c378247">
+<div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11; font-size: 96%;" dir="ui">
+<p> </p>
+
+<p> </p>
+
+<p> </p>
+
+<p> </p>
+
+<p>In Ruby, #<em>send</em> is used to call methods based on information that can not be known at compile time. </p>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension>
+</div></section><section data-id="23b71754576ef6e5e480ad4fedf5d159"><div class="sl-block" data-block-type="text" style="width: 1120px; left: 80px; top: 72px; height: auto;" data-block-id="f7f00720e6cf5847db99781cd5f44024">
+<div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 10;" dir="ui">
+<h1>#<em>send</em> and Dynamic Dispatch</h1>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension>
+</div>
+
+<div class="sl-block" data-block-type="text" data-name="text-d68680" style="height: auto; width: 1120px; left: 80px; top: 173px;" data-block-id="99647a929cf6b1a28b3028b41e3972aa">
+<div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11; font-size: 96%;" dir="ui">
+<p> </p>
+
+<p> </p>
+
+<p> </p>
+
+<p> </p>
+
+<p>#<em>send</em> is commonly used in Ruby metaprogramming.<br>
+<br>
+It can call methods based on their names, which might come from command line inputs or configuration file inputs or other sources not known until runtime.</p>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension>
+</div></section><section data-id="b0ab9ae3b039a53e79bef036a74a1516"><div class="sl-block" data-block-type="text" style="width: 1120px; left: 80px; top: 72px; height: auto;" data-block-id="4e915cee55656d035028a74d17e99e90">
+<div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 10;" dir="ui">
+<h1>#<em>send</em> and Dynamic Dispatch</h1>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension>
+</div>
+
+<div class="sl-block" data-block-type="text" data-name="text-d68680" style="height: auto; width: 152.095px; left: 80px; top: 288px;" data-block-id="a24c98649c86681b55d7b61b791edaa8">
+<div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11; font-size: 96%;" dir="ui">
+<p style="text-align: left;">Problem:</p>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension>
+</div>
+<div class="sl-block" data-block-type="text" data-name="text-8efd33" data-block-id="456432041809f3f0fae06db591c6cb4c" style="height: auto; width: 960px; left: 240px; top: 288px;"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 12;">
+<p style="text-align:left">Software accepts complex configuration from potentially nested, serialize YAML files. You want to provide a CLI option that can override anyconfig value from the command line. You DO NOT want to attempt to explicitly handle all possible config options, though. You want a generic solution that will just call the right methods based on CLI options.</p>
+
+<p style="text-align:left"> </p>
+
+<p style="text-align:left">command -k foo:bar -k deeper:nested:key:value</p>
+</div></div></section><section data-id="6ad217ec42ea93b7c4027387458e1868"><div class="sl-block" data-block-type="text" style="width: 517.259px; left: 80px; top: 72px; height: auto;" data-block-id="ae69865b6112a56ec6ee9949d99b5111">
+<div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 10;" dir="ui">
+<h1 style="text-align:left">#<em>send</em> and</h1>
+
+<h1 style="text-align:left"><span style="font-size:0.9em">Dynamic Dispatch</span></h1>
+
+<p> </p>
+
+<h2>in Crystal?</h2>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension>
+</div>
+
+<div class="sl-block" data-block-type="image" data-name="image-5ab6a3" data-block-id="0b84b906e6d4023a9c00747a5c8b49e5" style="width: 596.33px; height: 532.8px; left: 603.67px; top: 115.2px; min-width: 1px; min-height: 1px;"><div class="sl-block-content" style="z-index: 11;"><img style="" data-natural-width="1117" data-natural-height="998" data-lazy-loaded="" data-src="dynamic_and_metaprogramming_with_crystal/a760679f45a99e4e7886be7575cc94be.png"></div></div></section><section data-id="74bad38ab941b7954a840451fdc06f6c">
+
+<div class="sl-block" data-block-type="text" data-name="text-2242c1" data-block-id="30019d4b3b2366ea9289ad4101f220ba" style="height: auto; width: 600px; left: 340px; top: 72px;"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;">
+<h1>Building #<em>send</em>
+</h1>
+</div></div>
+<div class="sl-block" data-block-type="text" data-name="text-bdf004" data-block-id="41acda54c5bdd3f94204d80ba1aaf91d" style="height: auto; width: 600px; left: 340px; top: 216px;"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;">
+<p>Requirements:</p>
+</div></div></section><section data-id="eefa2796f205f7b0caae6eb5536628dd">
+
+<div class="sl-block" data-block-type="text" data-name="text-2242c1" style="height: auto; width: 600px; left: 340px; top: 72px;" data-block-id="2334ce3672301b2c25ec4999315c8f1d"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;">
+<h1>Building #<em>send</em>
+</h1>
+</div></div>
+<div class="sl-block" data-block-type="text" data-name="text-bdf004" style="height: auto; width: 1120px; left: 80px; top: 216px;" data-block-id="57c2beedd64b53b4c53f50d3f15f1d96"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;">
+<p>Requirements:</p>
+
+<p> </p>
+
+<ol>
+	<li>Wrap a method call in something that can be stored in a data structure.</li>
+</ol>
+</div></div></section><section data-id="5d149ce37c948302d94c8a7e6fbd8109">
+
+<div class="sl-block" data-block-type="text" data-name="text-2242c1" style="height: auto; width: 600px; left: 340px; top: 72px;" data-block-id="02e8e1a9a7d1cca707734430631b69be"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;">
+<h1>Building #<em>send</em>
+</h1>
+</div></div>
+<div class="sl-block" data-block-type="text" data-name="text-bdf004" style="height: auto; width: 549.156px; left: 80px; top: 216px;" data-block-id="a035602d2bd50ae0d673cc46e7af2b84"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;">
+<p>Requirements:</p>
+
+<p> </p>
+
+<ol>
+	<li>Wrap a method call in something that can be stored in a data structure.</li>
+</ol>
+</div></div>
+<div class="sl-block" data-block-type="code" data-name="code-7d7278" data-block-id="f5ec21450dcdf405e451e87135cb5dfc" style="width: 605px; height: 178px; left: 595px; top: 379.798px;"><div class="sl-block-content notranslate" data-highlight-theme="monokai" data-code-frame="none" style="z-index: 12;"><pre style="font-size: 18px; line-height: 22px;" class="ruby"><code data-line-numbers=""># With Procs
+method  = -&gt;(obj : Foo) { obj.a },
+method2 = -&gt;(obj : Foo, val : Int32) { obj.b(val) }
+
+method.call(receiver)
+method2.call(receiver, 123)</code></pre></div></div>
+<div class="sl-block" data-block-type="text" data-name="text-9d797f" data-block-id="c9c896034d3b1008bde5fe988581f850" style="height: auto; width: 560px; left: 645px; top: 249px;"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 13;">
+<p>With Procs:</p>
+</div></div></section><section data-id="d884641ce7fce600a037c31c0e689236">
+
+<div class="sl-block" data-block-type="text" data-name="text-2242c1" style="height: auto; width: 600px; left: 340px; top: 72px;" data-block-id="d16260831b11f3498a31a2644e49c9e4"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;">
+<h1>Building #<em>send</em>
+</h1>
+</div></div>
+<div class="sl-block" data-block-type="text" data-name="text-bdf004" style="height: auto; width: 549.156px; left: 80px; top: 216px;" data-block-id="818555e755c0495f6be2c3e684b94883"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;">
+<p>Requirements:</p>
+
+<p> </p>
+
+<ol>
+	<li>Wrap a method call in something that can be stored in a data structure.</li>
+</ol>
+</div></div>
+<div class="sl-block" data-block-type="code" data-name="code-fa9342" style="width: 526.397px; height: 356.095px; left: 673.603px; top: 243.51px;" data-block-id="50a9940be5ff42473fb36877c2d9c6b7"><div class="sl-block-content notranslate" data-highlight-theme="monokai" data-code-frame="none" style="z-index: 12;"><pre style="font-size: 19px; line-height: 23px;" class="ruby"><code data-line-numbers=""># With records (Structs)
+record Call_a, obj : Foo do
+  def call
+    obj.a
+  end
+end
+
+record Call_b, obj : Foo, val : Int32 do
+  def call
+    obj.b(val)
+  end
+end
+
+Call_a.new(receiver).call
+Call_b.new(receiver, 123).call</code></pre></div></div>
+<div class="sl-block" data-block-type="text" data-name="text-e31def" data-block-id="b21eac0c07cda62e96e22cb58acbf7df" style="height: auto; width: 560px; left: 640px; top: 177px;"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 13;">
+<p>With Records:</p>
+</div></div></section><section data-id="afcbd569b3a97501942d0cbda5b69c46">
+
+<div class="sl-block" data-block-type="text" data-name="text-2242c1" style="height: auto; width: 600px; left: 340px; top: 72px;" data-block-id="06375817bed202c8e9900ac192b90795"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;">
+<h1>Building #<em>send</em>
+</h1>
+</div></div>
+<div class="sl-block" data-block-type="text" data-name="text-bdf004" style="height: auto; width: 1120px; left: 80px; top: 216px;" data-block-id="d8bf00918922e01f5662e5428cd162b2"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;">
+<p>Requirements:</p>
+
+<p> </p>
+
+<ol>
+	<li>Wrap a method call in something that can be stored in a data structure.</li>
+	<li>Implement lookup tables that can find the wrapped method calls.</li>
+</ol>
+</div></div></section><section data-id="a75109fb9b2e6806cf6764732a066b77">
+
+<div class="sl-block" data-block-type="text" data-name="text-2242c1" style="height: auto; width: 600px; left: 340px; top: 72px;" data-block-id="9c71d22dbcfb44a4aee25ca2c58d5365"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;">
+<h1>Building #<em>send</em>
+</h1>
+</div></div>
+<div class="sl-block" data-block-type="text" data-name="text-bdf004" style="height: auto; width: 400px; left: 80px; top: 216px;" data-block-id="38ffe8d95b9fdea80d2dd8d063303663">
+<div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;" dir="ui">
+<p>Requirements:</p>
+
+<p> </p>
+
+<ol>
+	<li>Wrap a method call in something that can be stored in a data structure.</li>
+	<li>Implement lookup tables that can find the wrapped method calls.</li>
+</ol>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension>
+</div>
+<div class="sl-block" data-block-type="code" data-name="code-38ab3d" data-block-id="9f9aace3ce7e5f36197fcbc7330632d2" style="width: 640px; height: 432px; left: 560px; top: 216px;"><div class="sl-block-content notranslate" data-highlight-theme="monokai" data-code-frame="none" style="z-index: 12;"><pre class="ruby" style="font-size: 49px; line-height: 59px;"><code data-line-numbers="">SendLookup = {
+  "a" =&gt; Call_a
+}
+
+SendLookupInt32 = {
+  "b" =&gt; Call_b
+}</code></pre></div></div></section><section data-id="1acd6f5269d7fdc206a2e390422b16a1">
+
+<div class="sl-block" data-block-type="text" data-name="text-2242c1" style="height: auto; width: 600px; left: 340px; top: 72px;" data-block-id="890f3e66b63ac806518df97cebb7bde4"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;">
+<h1>Building #<em>send</em>
+</h1>
+</div></div>
+<div class="sl-block" data-block-type="text" data-name="text-bdf004" style="height: auto; width: 1120px; left: 80px; top: 216px;" data-block-id="d82836e6a975a71482793e58f2819327">
+<div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;" dir="ui">
+<p>Requirements:</p>
+
+<p> </p>
+
+<ol>
+	<li>Wrap a method call in something that can be stored in a data structure.</li>
+	<li>Implement lookup tables that can find the wrapped method calls.</li>
+	<li>Implement overloaded #<em>send</em> methods that match the type signatures of the methods to be called.</li>
+</ol>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension>
+</div></section><section data-id="d6bc55eee7bebafdf443eee408104db0">
+
+<div class="sl-block" data-block-type="text" data-name="text-2242c1" style="height: auto; width: 600px; left: 340px; top: 72px;" data-block-id="c87b2fec98e723d5bae9a020bbc0717f"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;">
+<h1>Building #<em>send</em>
+</h1>
+</div></div>
+<div class="sl-block" data-block-type="text" data-name="text-bdf004" style="height: auto; width: 480px; left: 80px; top: 216px;" data-block-id="ebf37acfa637d4733e0688a67a37e6e1">
+<div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;" dir="ui">
+<p>Requirements:</p>
+
+<p> </p>
+
+<ol>
+	<li>Wrap a method call in something that can be stored in a data structure.</li>
+	<li>Implement lookup tables that can find the wrapped method calls.</li>
+	<li>Implement overloaded #<em>send</em> methods that match the type signatures of the methods to be called.</li>
+</ol>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension>
+</div>
+<div class="sl-block" data-block-type="code" data-name="code-e8dfd5" data-block-id="34022b23efc33f150fdc2ff8e0883b30" style="width: 614.995px; height: 300px; left: 585.005px; top: 216px;"><div class="sl-block-content notranslate" data-highlight-theme="monokai" data-code-frame="none" style="z-index: 12;"><pre class="ruby" style="font-size: 22px; line-height: 26px;"><code data-line-numbers="">def send(method)
+  SendLookup[method].call(self)
+end
+
+def send(method, arg1 : Int32)
+  SendLookupInt32[method].call(self, arg1)
+end</code></pre></div></div></section><section data-id="33a3056b6058e9b26dde525f68c002d6">
+
+<div class="sl-block" data-block-type="text" data-name="text-2242c1" style="height: auto; width: 600px; left: 340px; top: 72px;" data-block-id="674ac2c238a9953abf44f7b31bb771a8"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;">
+<h1>Building #<em>send</em>
+</h1>
+</div></div>
+<div class="sl-block" data-block-type="text" data-name="text-bdf004" style="height: auto; width: 407.27px; left: 80px; top: 216px;" data-block-id="b0557d33e006142b2ddaa65a55fc6efa">
+<div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;" dir="ui">
+<p>Consider the following class:</p>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension>
+</div>
+<div class="sl-block" data-block-type="code" data-name="code-527d36" data-block-id="6abdf922328fdff015cb2615b61e722f" style="width: 720px; height: 432px; left: 480px; top: 216px;"><div class="sl-block-content notranslate" data-highlight-theme="monokai" data-code-frame="none" style="z-index: 12;"><pre class="ruby" style="font-size: 20px; line-height: 24px;"><code data-line-numbers="">class Foo
+  def a(val : Int32)
+    val + 7
+  end
+
+  def b(x : Int32, y : Int32)
+    x * y
+  end
+
+  def c(val : Int32, val2 : Int32)
+    val * val2
+  end
+
+  def d(xx : String, yy : Int32) : UInt128
+    xx.to_i.to_u128 ** yy
+  end
+end</code></pre></div></div></section><section data-id="b17cc7723ddac1017a291d3571afdb07">
+
+<div class="sl-block" data-block-type="text" data-name="text-2242c1" style="height: auto; width: 600px; left: 340px; top: 72px;" data-block-id="02201e1a47ca1764a4e12dbedcca6a03"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;">
+<h1>Building #<em>send</em>
+</h1>
+</div></div>
+<div class="sl-block" data-block-type="text" data-name="text-bdf004" style="height: auto; width: 407.27px; left: 80px; top: 216px;" data-block-id="1e1d743daee4406315ecc1becabba1f9">
+<div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;" dir="ui">
+<p>Send capability could be built like this:</p>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension>
+</div>
+<div class="sl-block" data-block-type="code" data-name="code-527d36" style="width: 720px; height: 508.992px; left: 480px; top: 170px;" data-block-id="348169b3fdf7a78ad5bfcd91334ac72e"><div class="sl-block-content notranslate" data-highlight-theme="monokai" data-code-frame="none" style="z-index: 12;"><pre class="ruby" style="font-size: 16px; line-height: 19px;"><code data-line-numbers="">module FooSends
+  SendLookupInt32 = {
+    "a": -&gt;(obj : Foo, val : Int32) { obj.a(val) },
+  }
+
+  SendLookupInt32Int32 = {
+    "b": -&gt;(obj : Foo, x : Int32, y : Int32) { obj.b(x, y) },
+    "c": -&gt;(obj : Foo, val : Int32, val2 : Int32) { obj.c(val, val2) },
+  }
+
+  SendLookupStringInt32 = {
+    "d": -&gt;(obj : Foo, xx : String, yy : Int32) { obj.d(x, y) }
+  }
+  
+  def send(method, arg1 : Int32)
+    SendLookupInt32[method].call(self, arg1)
+  end
+
+  def send(method, arg1 : Int32, arg2 : Int32)
+    SendLookupInt32Int32[method].call(self, arg1, arg2)
+  end
+  
+  def send(method, arg1 : String, arg2 : Int32)
+    SendLookupStringInt32[method].call(self, arg1, arg2)
+  end
+end</code></pre></div></div></section><section data-id="fee38a54e49291727ac4b1fa3eaca82f">
+
+<div class="sl-block" data-block-type="text" data-name="text-2242c1" style="height: auto; width: 600px; left: 340px; top: 72px;" data-block-id="a9dbbca01dd525fb962b1ef9ff296714"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;">
+<h1>Building #<em>send</em>
+</h1>
+</div></div>
+<div class="sl-block" data-block-type="text" data-name="text-bdf004" style="height: auto; width: 1120px; left: 80px; top: 393px;" data-block-id="53172e52009101fc1dafb80e545dfd9a">
+<div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;" dir="ui">
+<p>For a big class, or if there are many classes, this would be no fun at all.</p>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension>
+</div></section><section data-id="5a594a3486982d33a187bb5a585920b4">
+
+<div class="sl-block" data-block-type="text" data-name="text-2242c1" style="height: auto; width: 600px; left: 340px; top: 72px;" data-block-id="9ae887bdc171ca975ec7893f452778b5"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;">
+<h1>Building #<em>send</em>
+</h1>
+</div></div>
+<div class="sl-block" data-block-type="text" data-name="text-bdf004" style="height: auto; width: 1120px; left: 80px; top: 216px;" data-block-id="8e1dda19874eeb9de58d34878ad274c8">
+<div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;" dir="ui">
+<p>Requirements:</p>
+
+<p> </p>
+
+<ol>
+	<li>Wrap a method call in something that can be stored in a data structure.</li>
+	<li>Implement lookup tables that can find the wrapped method calls.</li>
+	<li>Implement overloaded #<em>send</em> methods that match the type signatures of the methods to be called.<br>
+	 </li>
+	<li>Have Crystal build the code itself instead of requiring that it be hand-built.</li>
+</ol>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension>
+</div></section><section data-id="8d596f47848d510be01dcf7c61dc80eb">
+
+<div class="sl-block" data-block-type="text" data-name="text-2242c1" style="height: auto; width: 600px; left: 340px; top: 72px;" data-block-id="b4f691d4fd0df4af8d33d694d8ce4f6f"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;">
+<h1>Building #<em>send</em>
+</h1>
+</div></div>
+<div class="sl-block" data-block-type="text" data-name="text-bdf004" style="height: auto; width: 1120px; left: 80px; top: 216px;" data-block-id="83935799d8e743d70605b5793263d907">
+<div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;" dir="ui">
+<p>Requirements:</p>
+
+<p> </p>
+
+<p>...</p>
+
+<p>4. Have Crystal build the code itself instead of requiring that it be hand-built.</p>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension>
+</div></section><section data-id="e3f795dfaa78592d5ac0c2ff434cda23">
+
+<div class="sl-block" data-block-type="text" data-name="text-2242c1" style="height: auto; width: 600px; left: 340px; top: 72px;" data-block-id="6f141834fc1dd1d4f2645611ff929005"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;">
+<h1>Building #<em>send</em>
+</h1>
+</div></div>
+<div class="sl-block" data-block-type="text" data-name="text-bdf004" style="height: auto; width: 1120px; left: 80px; top: 216px;" data-block-id="5306fb4fc825950cb5e7ed492a2613ef">
+<div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;" dir="ui">
+<p>Macros!</p>
+
+<p> </p>
+
+<p>Macros are code, essentially written in an interpreted subset of Crystal, which writes</p>
+
+<p>new code that will be inserted into the codebase and compiled with it. </p>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension>
+</div></section><section data-id="47bbdd9d150875e812d0bbbe91b3ac60">
+
+<div class="sl-block" data-block-type="text" data-name="text-2242c1" style="height: auto; width: 600px; left: 340px; top: 72px;" data-block-id="f20afd1748b4249c97679e4a926ac31b"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;">
+<h1>Building #<em>send</em>
+</h1>
+</div></div>
+<div class="sl-block" data-block-type="text" data-name="text-bdf004" style="height: auto; width: 1120px; left: 80px; top: 216px;" data-block-id="ae725efb618f159e6e40c020334d06e0">
+<div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;" dir="ui">
+<p>Macros!</p>
+
+<p> </p>
+
+<p>Macros have access to reflection data -- types, methods, classes, annotations, etc...</p>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension>
+</div></section><section data-id="2177039b80a489543ac716806457f578">
+
+<div class="sl-block" data-block-type="text" data-name="text-2242c1" style="height: auto; width: 600px; left: 340px; top: 72px;" data-block-id="af97d1559b864a79bda17dc3085639b7"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;">
+<h1>Building #<em>send</em>
+</h1>
+</div></div>
+<div class="sl-block" data-block-type="text" data-name="text-bdf004" style="height: auto; width: 1120px; left: 80px; top: 216px;" data-block-id="3f9cef1514e223a11f82005fcd6360e9">
+<div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;" dir="ui">
+<p>Macros!</p>
+
+<p> </p>
+
+<p>Macros can build everything that we need!</p>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension>
+</div></section><section data-id="d7dda34ebb7a74c7531f0984fa1a4e67">
+
+<div class="sl-block" data-block-type="text" data-name="text-2242c1" style="height: auto; width: 600px; left: 340px; top: 72px;" data-block-id="3b5999bf6810fcebca4cbfa3a644320f"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;">
+<h1>Building #<em>send</em>
+</h1>
+</div></div>
+<div class="sl-block" data-block-type="code" data-name="code-f36e03" data-block-id="be1e6988797ef67b1d8fac999f8957c7" style="width: 512.099px; height: 504px; left: 80px; top: 180px;"><div class="sl-block-content notranslate" data-highlight-theme="monokai" data-code-frame="none" style="z-index: 11;"><pre class="ruby" style="font-size: 16px; line-height: 19px;"><code data-line-numbers="">require "send"
+
+class Foo
+  include Send
+
+  def a(val : Int32)
+    val + 7
+  end
+
+  def b(x : Int32, y : Int32)
+    x * y
+  end
+
+  def c(val : Int32, val2 : Int32)
+    val * val2
+  end
+
+  def d(xx : String, yy : Int32) : UInt128
+    xx.to_i.to_u128 ** yy
+  end
+end
+
+Send.activate
+
+f = Foo.new
+pp f.__send__("b", 23, 37)</code></pre></div></div></section><section data-id="12854b641404d39016b0edd804eb34cc">
+
+<div class="sl-block" data-block-type="text" data-name="text-2242c1" style="height: auto; width: 600px; left: 340px; top: 72px;" data-block-id="d085d4661281e3d22795b15c20210b7c"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 10;">
+<h1>Building #<em>send</em>
+</h1>
+</div></div>
+<div class="sl-block" data-block-type="text" data-name="text-dbcdc0" data-block-id="c8621f201e9350208791a810557c7646" style="height: auto; width: 1120px; left: 80px; top: 216px;"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;">
+<p>The full implementation is a talk all by itself.</p>
+
+<p> </p>
+
+<p>Take a look at:  <a href="https://github.com/wyhaines/Send.cr" target="_blank">https://github.com/wyhaines/Send.cr</a></p>
+</div></div></section></section><section class="stack" data-id="5f1ec4649c8a73de5e18d02926fca47c"><section data-id="d449a1c260cd1cdd1587b9faa6538018"><div class="sl-block" data-block-type="text" style="width: 1120px; left: 80px; top: 72px; height: auto;" data-block-id="ed1c7d139580c15888c02dfe32cd61e0">
+<div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 10;" dir="ui">
+<h1>#<em>method_missing</em>
+</h1>
+
+<h2>Building methods on-demand</h2>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension>
+</div>
+
+<div class="sl-block" data-block-type="text" data-name="text-d68680" style="height: auto; width: 1120px; left: 80px; top: 257px;" data-block-id="5e3dc6feece9be62011099e99aee5a32">
+<div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11; font-size: 96%;" dir="ui">
+<p> </p>
+
+<p> </p>
+
+<p> </p>
+
+<p>In Ruby, #<em>method_missing</em> is a method that is called at runtime when an attempt is made to invoke a method that doesn't exist in the current scope.</p>
+
+<p> </p>
+
+<p>Crystal implements this as a compile-time feature using a macro.</p>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 11;" class="cGcvT"></grammarly-extension>
+</div></section><section data-id="b8f34ab09709017fea90b44d0cdd3270"><div class="sl-block" data-block-type="text" style="width: 1120px; left: 80px; top: 72px; height: auto;" data-block-id="fcb1dc182b4bc834f038b47eff4cc617">
+<div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 10;" dir="ui">
+<h1>#<em>method_missing</em>
+</h1>
+
+<h2>Building methods on-demand</h2>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension>
+</div>
+
+<div class="sl-block" data-block-type="image" data-name="image-f62b10" data-block-id="d948cbf9a51b0ca6cef54cfcb18c9e29" style="width: 1120px; height: 258.944px; left: 80px; top: 282.822px; min-width: 1px; min-height: 1px;"><div class="sl-block-content" style="z-index: 11;"><img style="" data-natural-width="2500" data-natural-height="578" data-lazy-loaded="" data-src="dynamic_and_metaprogramming_with_crystal/03ee0fa27afceb2ab1eefcd75e93f019.png"></div></div></section><section data-id="40af46e442f3bbb530909bd19dedba68"><div class="sl-block" data-block-type="text" style="width: 1120px; left: 80px; top: 72px; height: auto;" data-block-id="6e7ef8b8d15abdf56190208cd09bfa8c">
+<div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 10;" dir="ui">
+<h1>#<em>method_missing</em>
+</h1>
+
+<h2>Building methods on-demand</h2>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension>
+</div>
+
+<div class="sl-block" data-block-type="image" data-name="image-219bf0" data-block-id="a23599cf80e6a7fcfaf2041b9ad8886c" style="width: 1120px; height: 146.13px; left: 80px; top: 358.935px; min-width: 1px; min-height: 1px;"><div class="sl-block-content" style="z-index: 11;"><img style="" data-natural-width="1119" data-natural-height="146" data-lazy-loaded="" data-src="dynamic_and_metaprogramming_with_crystal/8313d5559a2316fa028c78a3042410ae.png"></div></div></section><section data-id="fc23c6f3c4fba036d24bfd233c8719ad"><div class="sl-block" data-block-type="text" style="width: 603.05px; left: 80px; top: 72px; height: auto;" data-block-id="d9c5d8fbeda69a640dfbd6ca9e12c14f">
+<div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 10;" dir="ui">
+<h1>#<em>method_missing</em>
+</h1>
+
+<h2>One, of many uses -- a wrapper class</h2>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension>
+</div>
+
+<div class="sl-block" data-block-type="image" data-name="image-a22ae4" style="width: 523.332px; height: 532.8px; left: 676.668px; top: 72px; min-width: 1px; min-height: 1px;" data-block-id="55b2393aa90a352ea71cbec47ea946de"><div class="sl-block-content" style="z-index: 12;"><img style="" data-natural-width="608" data-natural-height="619" data-lazy-loaded="" data-src="dynamic_and_metaprogramming_with_crystal/b3230256a1ec84431a0b455e6b93b9f1.png"></div></div></section><section data-id="2b647eae7a3d6d99cf5ebf48c0d40934"><div class="sl-block" data-block-type="text" style="width: 1120px; left: 80px; top: 72px; height: auto;" data-block-id="96e9ca975fb978ec1cb320a7baddada8">
+<div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 10;" dir="ui">
+<h1>#<em>method_missing</em>
+</h1>
+
+<h2>One, of many uses -- a wrapper class</h2>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension>
+</div>
+
+<div class="sl-block" data-block-type="image" data-name="image-a345ec" data-block-id="ffe64bd72bc0ad52ef34eb79bf46049d" style="width: 1075.2px; height: 371.078px; left: 102.4px; top: 276.922px; min-width: 1px; min-height: 1px;"><div class="sl-block-content" style="z-index: 11;"><img style="" data-natural-width="2092" data-natural-height="722" data-lazy-loaded="" data-src="dynamic_and_metaprogramming_with_crystal/4cf84369eb5c24924c96b858a7d73910.png"></div></div></section><section data-id="ddfed46e6bc1c4d0bc94cfcc1117fab3"><div class="sl-block" data-block-type="text" style="width: 1120px; left: 80px; top: 72px; height: auto;" data-block-id="2bf59c57b8dc70cddb17c8b7092a8edf">
+<div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 10;" dir="ui">
+<h1>#<em>method_missing</em>
+</h1>
+
+<h2>One, of many uses -- a wrapper class</h2>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension>
+</div>
+
+<div class="sl-block" data-block-type="image" data-name="image-bce403" data-block-id="b5c01f9faad7b1641f571ff2c750d93e" style="width: 1075.2px; height: 288.026px; left: 102.4px; top: 359.974px; min-width: 1px; min-height: 1px;"><div class="sl-block-content" style="z-index: 11;"><img style="" data-natural-width="1482" data-natural-height="397" data-lazy-loaded="" data-src="dynamic_and_metaprogramming_with_crystal/bc31f0950a06e5bd339705ccd94de297.png"></div></div></section><section data-id="023f0ce856d9b93822ff94d675941af4"><div class="sl-block" data-block-type="text" style="width: 1120px; left: 80px; top: 72px; height: auto;" data-block-id="492b0d91af0d8b003cdf1ba769c72488">
+<div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 10;" dir="ui">
+<h1>#<em>method_missing</em>
+</h1>
+
+<h2>One, of many uses -- a wrapper class</h2>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension>
+</div>
+
+<div class="sl-block" data-block-type="image" data-name="image-c6246e" data-block-id="54a4b11d420d121dffdc266ba02a8bce" style="width: 1134.84px; height: 288px; left: 72.58px; top: 360px; min-width: 1px; min-height: 1px;"><div class="sl-block-content" style="z-index: 11;"><img style="" data-natural-width="1521" data-natural-height="386" data-lazy-loaded="" data-src="dynamic_and_metaprogramming_with_crystal/a16af8294e8d995a026b89ac9c15e2f6.png"></div></div></section></section><section data-id="dda7788560dcfa16758e69123a3ec248"><div class="sl-block" data-block-type="text" style="width: 1120px; left: 80px; top: 72px; height: auto;" data-block-id="69100b935056055de3d0eb3e76e1b4ce">
+<div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 10;" dir="ui">
+<h1>These Examples<br>
+Just Scratch The Surface</h1>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension>
+</div>
+
+<div class="sl-block" data-block-type="text" data-name="text-1b807b" data-block-id="17ebe83f14a50e2168e33f2eb0b0b0c1" style="height: auto; width: 1120px; left: 80px; top: 354px;"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;">
+<p>Crystal's metaprogramming capabilities and the dynamic language qualities that can be built from them are powerful.</p>
+</div></div></section><section data-id="6319bf64eeeec7c66745fbdd2dfbb8e8"><div class="sl-block" data-block-type="text" style="width: 1120px; left: 80px; top: 72px; height: auto;" data-block-id="04c1ee569a40a7aa70e647a6e52d0ce9">
+<div class="sl-block-content" data-placeholder-tag="h1" data-placeholder-text="Title Text" style="z-index: 10;" dir="ui">
+<h1>Thank You!</h1>
+</div>
+<grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension><grammarly-extension data-grammarly-shadow-root="true" style="position: absolute; top: 0px; left: 0px; pointer-events: none; z-index: 10;" class="cGcvT"></grammarly-extension>
+</div>
+
+<div class="sl-block" data-block-type="text" data-name="text-1b807b" style="height: auto; width: 1120px; left: 80px; top: 216px;" data-block-id="4d99d9ed4aeddbc2d16c49999df1e5b0"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 11;">
+<h2>Questions?</h2>
+</div></div>
+<div class="sl-block" data-block-type="text" data-name="text-93483e" data-block-id="d0da041ec411d692684418af7923f4fb" style="height: auto; width: 1120px; left: 80px; top: 340.5px;"><div class="sl-block-content" data-placeholder-tag="p" data-placeholder-text="Text" style="z-index: 12;">
+<p>All of the code for this presentation, and the slide deck, will be pushed to GitHub@</p>
+
+<p> </p>
+
+<p><a href="https://github.com/wyhaines/crystal-conf-1.0-dynamic-crystal" target="_blank">https://github.com/wyhaines/crystal-conf-1.0-dynamic-crystal</a></p>
+</div></div></section>
+			</div>
+		</div>
+
+		<script>
+			var SLConfig = {"deck": {"id":2177781,"slug":"dynamic_and_metaprogramming_with_crystal","title":"Dynamic and Metaprogramming with Crystal","description":"Compiled, statically typed languages aren't typically known for their dynamic nature or their ability to cater to metaprogramming of the type that languages like Ruby are known for. And while it is true that some of the things that Ruby does aren't easily supported within the Crystal ecosystem, Crystal does provide programmers with a powerful, capable set of tools for building the same sorts of dynamic metaprogramming that Ruby is known for. This talk will survey some of those techniques, and look at how they work to achieve surprisingly powerful results.","width":1280,"height":720,"margin":0.05,"visibility":"all","published_at":"2021-07-07T18:44:47.463Z","sanitize_messages":null,"thumbnail_url":"https://s3.amazonaws.com/media-p.slid.es/thumbnails/24dc71a3af0a295f1a4219bc394e8701/thumb.jpg?1625770703","view_count":3,"user":{"id":489394,"username":"wyhaines","name":"","description":"","thumbnail_url":"https://www.gravatar.com/avatar/ca8efd0ba834b02b9b7dd34b5c6c2721?s=140\u0026d=https%3A%2F%2Fstatic.slid.es%2Fimages%2Fdefault-profile-picture.png","account_type":"lite","team_id":null,"settings":{"id":331484,"present_controls":true,"present_upsizing":true,"present_pointer":false,"present_notes":true,"default_deck_tag_id":null}},"background_transition":"concave","transition":"default","theme_id":null,"theme_font":"josefine","theme_color":"cobalt-orange","auto_slide_interval":0,"comments_enabled":true,"forking_enabled":true,"rolling_links":false,"center":false,"shuffle":false,"should_loop":false,"share_notes":false,"slide_number":true,"slide_count":73,"rtl":false,"version":2,"collaborative":false,"deck_user_editor_limit":1,"data_updated_at":1625770703261,"font_typekit":null,"font_google":null,"time_limit":null,"navigation_mode":"default","upsizing_enabled":true,"notes":{}}};
+
+
+			// Use local fonts
+			SLConfig.fonts_url = 'lib/fonts/';
+		</script>
+
+		<script src="lib/reveal.js"></script>
+		<script src="lib/reveal-plugins.js"></script>
+		<script src="lib/offline.js"></script>
+
+		<!-- Initialize the presentation -->
+		<script>
+			Reveal.initialize({
+				width: 1280,
+				height: 720,
+				margin: 0.05,
+				
+
+				hash: true,
+				controls: true,
+				progress: true,
+				mouseWheel: false,
+				showNotes: false,
+				slideNumber: true,
+				fragmentInURL: true,
+
+				autoSlide: 0,
+				autoSlideStoppable: true,
+
+				autoAnimateMatcher: SL.deck.AutoAnimate.matcher,
+
+				center: false,
+				shuffle: false,
+				loop: false,
+				rtl: false,
+				navigationMode: "default",
+
+				transition: "default",
+				backgroundTransition: "concave",
+
+				highlight: {
+					escapeHTML: false
+				},
+
+				plugins: [ RevealZoom, RevealNotes, RevealMarkdown, RevealHighlight ]
+			});
+		</script>
+
+		
+
+	</body>
+</html>
